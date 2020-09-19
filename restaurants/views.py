@@ -77,6 +77,8 @@ def restaurant_create(request):
 def item_create(request, restaurant_id):
     form = ItemForm()
     restaurant = Restaurant.objects.get(id=restaurant_id)
+    if not request.user.is_staff and not restaurant.owner == request.user:
+        return redirect('no-access')
     if request.method == "POST":
         form = ItemForm(request.POST)
         if form.is_valid():
@@ -92,7 +94,7 @@ def item_create(request, restaurant_id):
 
 def restaurant_update(request, restaurant_id):
     restaurant_obj = Restaurant.objects.get(id=restaurant_id)
-    if not (request.user.is_staff or restaurant_obj.owner):
+    if not (request.user.is_staff or request.user == restaurant_obj.owner):
         return redirect('no-access')
     form = RestaurantForm(instance=restaurant_obj)
     if request.method == "POST":
